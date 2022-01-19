@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>registration</title>
+    <script src="index.js"></script>
+</head>
+<body style="background-image: url('eNWDJx.jpg');">
+    <link rel="stylesheet" media="screen" href="style.css">
+    <form target="_blank" class="form"> 
+        <p class="font">firstName:</p>
+        <div class="fNameErrorDiv"></div>
+        <p><input type="text" required class="frNameInput input" maxlength="255" name="Fname"></p>
+        <p class="font">LastName:</p>
+        <div class="lNamelErrorDiv"></div>
+        <p><input type="text" required class="lstNameInput input" maxlength="255" name="Lname"></p>
+        <p class="font">eMail:</p>
+        <div class="emailErrorDiv"></div>
+        <p><input type="email" required class="emailInput input" pattern="[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]*$" name="email"></p>
+        <p class="font">password:</p>
+        <div class="passwordErrorDiv"></div>
+        <p><input type="password" required class="passwordInput input" maxlength="65" minlength="8"name="password"></p>
+        <button type="button" class="font button">Sign up</button>
+    </form>
+    
+</body>
+</html>

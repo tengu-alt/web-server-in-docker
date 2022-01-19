@@ -1,0 +1,21 @@
+.form {
+  
+    position: absolute;
+    right: 20px;
+  
+  }
+  .hidden {
+      display: none !important;
+    }
+  .font {
+  font-size: 20px;
+  font-family: century-gothic;
+  }
+  .input {
+    border-radius: 20px;
+    background-color: transparent;
+    border: 2px solid black
+  }
+  .button {
+    border-radius: 20px;
+  }
