@@ -10,16 +10,8 @@ import (
 
 type User = users.User
 
-const (
-	host     = "localhost"
-	port     = 6080
-	user     = "postgres"
-	password = "12345"
-	dbname   = "users"
-)
-
 func InsertToDB(u User) {
-	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	psqlconn := fmt.Sprintf("postgres://postgres:12345@sqlserver/users?sslmode=disable")
 	db, err := sql.Open("postgres", psqlconn)
 	if err != nil {
 		panic(err)
