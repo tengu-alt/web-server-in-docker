@@ -1,7 +1,10 @@
 package validation
 
 import (
+	"context"
 	"fmt"
+	"github.com/jackc/pgx/v4"
+	"os"
 	"regexp"
 	"registration-web-service2/pkg/users"
 )
@@ -18,6 +21,21 @@ func ValidEmail(email string) bool {
 	var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	if emailRegex.MatchString(email) != true {
 		return false
+	}
+	return true
+}
+func CheckMail(email string) bool {
+	pgxconn, err := pgx.Connect(context.Background(), "postgres://postgres:12345@sqlserver/users?sslmode=disable")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	defer pgxconn.Close(context.Background())
+	var searchMail string
+	err = pgxconn.QueryRow(context.Background(), "SELECT email FROM signed_users WHERE email=$1", email).Scan(&searchMail)
+	if searchMail == email {
+		return false
+		fmt.Print("we have some")
 	}
 	return true
 }
@@ -59,6 +77,11 @@ func Validate(u User) []ValidationErr {
 		errors = append(errors, ValidationErr{
 			FieldValue: "Email",
 			ErrMassage: "email failed verification",
+		})
+	} else if CheckMail(u.Email) != true {
+		errors = append(errors, ValidationErr{
+			FieldValue: "Email",
+			ErrMassage: "email is already exist",
 		})
 	}
 

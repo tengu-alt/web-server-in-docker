@@ -41,6 +41,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Print("user", u)
+	//store.CheckEmail(u.Email)
 	store.InsertToDB(u)
 	w.Write([]byte("[{}]"))
 }
