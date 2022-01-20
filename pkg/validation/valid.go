@@ -35,7 +35,6 @@ func CheckMail(email string) bool {
 	err = pgxconn.QueryRow(context.Background(), "SELECT email FROM signed_users WHERE email=$1", email).Scan(&searchMail)
 	if searchMail == email {
 		return false
-		fmt.Print("we have some")
 	}
 	return true
 }
