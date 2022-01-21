@@ -5,7 +5,7 @@ const passwordInput = document.querySelector('.passwordInput');
 const FnameInput = document.querySelector('.frNameInput');
 const LnameInput = document.querySelector('.lstNameInput');
 
-  const url = "http://127.0.0.1:8081/login";
+  const url = window.location.origin + "/login";
   
   const data = {
     FirstName: FnameInput.value,
