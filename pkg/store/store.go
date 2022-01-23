@@ -3,6 +3,7 @@ package store
 import (
 	"database/sql"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"registration-web-service2/pkg/users"
 
 	_ "github.com/lib/pq"
@@ -22,5 +23,19 @@ func InsertToDB(u User) {
 		panic(err)
 	}
 	defer insert.Close()
+	insertHash, err := db.Query("insert into credentials (satl_hash) values ($1)", HashPassword(u.Password))
+	if err != nil {
+		panic(err)
+	}
+	defer insertHash.Close()
 	fmt.Println("inserting")
+
+}
+func HashPassword(password string) string {
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		panic(err)
+	}
+	return string(hashedPassword)
 }
