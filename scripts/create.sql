@@ -1,6 +1,8 @@
 create table IF NOT EXISTS signed_users (
+                              user_id serial,
                               firstname varchar,
                               lastname varchar,
                               email varchar UNIQUE,
-                              user_password varchar
+                              PRIMARY KEY (user_id)
+
 )

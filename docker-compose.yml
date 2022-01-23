@@ -10,6 +10,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
     volumes:
+      - ./scripts:/docker-entrypoint-credentialsdb.d/
       - ./scripts:/docker-entrypoint-initdb.d/
       - pg_data:/var/lib/sql-server/data
   regir:

@@ -17,7 +17,7 @@ func InsertToDB(u User) {
 		panic(err)
 	}
 	defer db.Close()
-	insert, err := db.Query("INSERT INTO signed_users (firstname,lastname,email,user_password) VALUES($1,$2,$3,$4)", u.FirstName, u.LastName, u.Email, u.Password)
+	insert, err := db.Query("INSERT INTO signed_users (firstname,lastname,email) VALUES($1,$2,$3)", u.FirstName, u.LastName, u.Email)
 	if err != nil {
 		panic(err)
 	}
