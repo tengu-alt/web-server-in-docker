@@ -1,7 +1,9 @@
 package store
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/base64"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"registration-web-service2/pkg/users"
@@ -23,7 +25,11 @@ func InsertToDB(u User) {
 		panic(err)
 	}
 	defer insert.Close()
-	insertHash, err := db.Query("insert into credentials (satl_hash) values ($1)", HashPassword(u.Password))
+	salt := make([]byte, 8)
+	if _, err := rand.Read(salt); err != nil {
+		panic(err)
+	}
+	insertHash, err := db.Query("insert into credentials (salt,satl_hash) values ($1,$2)", base64.StdEncoding.EncodeToString(salt), HashPassword(u.Password+base64.StdEncoding.EncodeToString(salt)))
 	if err != nil {
 		panic(err)
 	}
@@ -37,5 +43,7 @@ func HashPassword(password string) string {
 	if err != nil {
 		panic(err)
 	}
-	return string(hashedPassword)
+
+	return base64.StdEncoding.EncodeToString(hashedPassword)
+
 }
