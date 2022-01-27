@@ -2,14 +2,17 @@ package validation
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"github.com/jackc/pgx/v4"
+	"golang.org/x/crypto/bcrypt"
 	"os"
 	"regexp"
 	"registration-web-service2/pkg/users"
 )
 
 type User = users.User
+type LoginUser = users.LoginUser
 type ValidationErr = users.ValidationErr
 
 func Printer(i string) string {
@@ -85,4 +88,33 @@ func Validate(u User) []ValidationErr {
 	}
 
 	return errors
+}
+func LoginValid(u LoginUser) bool {
+	if CheckMail(u.LoginMail) == false {
+		if CheckLoginPassword(u) == true {
+			return true
+		}
+	}
+	return false
+}
+func CheckLoginPassword(u LoginUser) bool {
+	pgxconn, err := pgx.Connect(context.Background(), "postgres://postgres:12345@sqlserver/users?sslmode=disable")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	defer pgxconn.Close(context.Background())
+	var searchId int
+	err = pgxconn.QueryRow(context.Background(), "SELECT user_id FROM signed_users WHERE email=$1", u.LoginMail).Scan(&searchId)
+	var searchSalt, searchHash string
+	err = pgxconn.QueryRow(context.Background(), "SELECT salt, salt_hash FROM credentials WHERE user_id=$1", searchId).Scan(&searchSalt, &searchHash)
+	compare, _ := base64.StdEncoding.DecodeString(searchHash)
+	err = bcrypt.CompareHashAndPassword(compare, []byte(u.LoginPassword+searchSalt))
+	if err != nil {
+
+		return false
+	}
+
+	return true
+
 }

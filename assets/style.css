@@ -19,3 +19,9 @@
   .button {
     border-radius: 20px;
   }
+  .formLogin {
+
+    position: absolute;
+    right: 20px;
+    top: 450px;
+  }

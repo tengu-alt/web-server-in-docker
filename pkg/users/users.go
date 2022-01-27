@@ -10,3 +10,7 @@ type ValidationErr struct {
 	FieldValue string
 	ErrMassage string
 }
+type LoginUser struct {
+	LoginMail     string `json:"email"`
+	LoginPassword string `json:"password"`
+}
