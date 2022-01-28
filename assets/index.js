@@ -91,13 +91,15 @@ function doLogin(){
       .then((data) => {
         function login (object) {
           let loginErr = document.querySelector(".loginError");
-          if (object.ErrMassage === "invalid data"){
-            loginErr.innerHTML = object.ErrMassage;
+          if (object.ResponseMessage === "invalid data"){
+            loginErr.innerHTML = object.ResponseMessage;
           }
           else {
             loginErr.innerHTML = "";
             console.log("success");
+            window.localStorage.setItem("token",object.Token);
             window.location.href = 'login.html';
+            document.querySelector(".formLogin").classList.add("hidden")
             return;
           }
         }
@@ -108,8 +110,38 @@ function doLogin(){
 
 
 }
+function doLogout(){
+  const url = window.location.origin + "/logout";
+
+  const data = window.localStorage.getItem("token")
+  const response = fetch(url, {
+    method: 'POST',
+    mode: 'cors',
+    cache: 'no-cache',
+    credentials: 'same-origin',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    redirect: 'follow',
+    referrerPolicy: 'no-referrer',
+    body: JSON.stringify(data)
+  }).then((response) => {
+    window.localStorage.clear()
+    document.querySelector(".formLogin").classList.remove("hidden")
+    window.location.reload()
+
+  })
+}
 
 function registration() {
+  const logoutBut = document.querySelector(".buttonLogout")
+  if (window.localStorage.getItem("token")){
+    logoutBut.classList.remove("hidden")
+  }
+  logoutBut.addEventListener('click', doLogout)
+  if (window.localStorage.getItem("token")){
+    document.querySelector(".formLogin").classList.add("hidden")
+  }
 const sendBut = document.querySelector('.button')
 sendBut.addEventListener('click', doRequest);
 const loginBut = document.querySelector('.buttonLogin')

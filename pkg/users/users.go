@@ -14,3 +14,12 @@ type LoginUser struct {
 	LoginMail     string `json:"email"`
 	LoginPassword string `json:"password"`
 }
+type Config struct {
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	DB       string `yaml:"db"`
+}
+type TokenResponse struct {
+	ResponseMessage string
+	Token           string
+}
