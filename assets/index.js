@@ -132,8 +132,35 @@ function doLogout(){
 
   })
 }
+function doSayName(){
+  const url = window.location.origin + "/sayname";
+
+  const data = window.localStorage.getItem("token")
+  const response = fetch(url, {
+    method: 'POST',
+    mode: 'cors',
+    cache: 'no-cache',
+    credentials: 'same-origin',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    redirect: 'follow',
+    referrerPolicy: 'no-referrer',
+    body: JSON.stringify(data)
+  }).then((response) => {
+    return response.json()
+  }).then((data) => {
+    document.querySelector(".sayDiv").innerHTML = data.ResponseMessage
+  });
+
+}
 
 function registration() {
+  const sayBut = document.querySelector(".sayBut")
+  if (window.localStorage.getItem("token")){
+    sayBut.classList.remove("hidden")
+  }
+  sayBut.addEventListener("click", doSayName)
   const logoutBut = document.querySelector(".buttonLogout")
   if (window.localStorage.getItem("token")){
     logoutBut.classList.remove("hidden")

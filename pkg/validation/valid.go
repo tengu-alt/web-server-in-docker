@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/golang-jwt/jwt"
 	"github.com/jackc/pgx/v4"
 	"golang.org/x/crypto/bcrypt"
 	"os"
@@ -119,26 +120,20 @@ func CheckLoginPassword(u LoginUser) bool {
 	return true
 
 }
-func CheckToken(u LoginUser) bool {
-	pgxconn, err := pgx.Connect(context.Background(), store.GetConfig())
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
+func SayNameFunc(tokenString string) string {
+	hmacSampleSecret := []byte(store.GetKey())
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return hmacSampleSecret, nil
+	})
+	var result string
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		result = fmt.Sprintln(claims["name"])
+	} else {
+		fmt.Println(err)
 	}
-	defer pgxconn.Close(context.Background())
-	var searchId int
-	err = pgxconn.QueryRow(context.Background(), "SELECT user_id FROM signed_users WHERE email=$1", u.LoginMail).Scan(&searchId)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(searchId)
-	var tokenId int
-	err = pgxconn.QueryRow(context.Background(), "SELECT token FROM tokens WHERE user_id=$1", searchId).Scan(&tokenId)
-	if err != nil {
-		return false
-	}
-	if tokenId > 0 {
-		return false
-	}
-	return true
+	return result
 }

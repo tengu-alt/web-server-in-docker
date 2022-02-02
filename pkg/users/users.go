@@ -18,6 +18,7 @@ type Config struct {
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
 	DB       string `yaml:"db"`
+	Key      string `yaml:"key"`
 }
 type TokenResponse struct {
 	ResponseMessage string

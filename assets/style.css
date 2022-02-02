@@ -25,3 +25,15 @@
     right: 20px;
     top: 450px;
   }
+  .sayBut {
+    position: absolute;
+    right: 500px;
+    top: 450px;
+
+  }
+  .sayDiv {
+    position: absolute;
+    right: 500px;
+    top: 430px;
+
+  }

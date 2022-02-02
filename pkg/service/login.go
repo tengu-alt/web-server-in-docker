@@ -61,10 +61,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp := TokenResponse{}
-	if validation.CheckToken(us) == false {
-		fmt.Println("we have")
-
-	}
 	if validation.LoginValid(us) == true {
 		token := store.GiveToken(us)
 		resp.ResponseMessage = "success login"
@@ -101,4 +97,27 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	}
 	store.DropToken(token)
 	w.Write(b)
+}
+func SayName(w http.ResponseWriter, r *http.Request) {
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+	defer r.Body.Close()
+	data := []byte(b)
+	var token string
+	err = json.Unmarshal(data, &token)
+	if err != nil {
+		return
+	}
+	resp := TokenResponse{}
+	resp.ResponseMessage = validation.SayNameFunc(token)
+	b, err = json.Marshal(resp)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(b)
+
 }

@@ -19,6 +19,7 @@ func main() {
 	http.HandleFunc("/", hello)
 	http.HandleFunc("/signUp", service.SignUp)
 	http.HandleFunc("/login", service.Login)
+	http.HandleFunc("/sayname", service.SayName)
 	http.HandleFunc("/logout", service.Logout)
 	http.Handle("/login.html", http.FileServer(http.Dir("../assets")))
 	http.Handle("/submit.html", http.FileServer(http.Dir("../assets")))

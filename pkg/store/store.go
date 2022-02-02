@@ -6,15 +6,15 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"fmt"
+	"github.com/golang-jwt/jwt"
 	"github.com/jackc/pgx/v4"
+	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
 	"os"
 	"registration-web-service2/pkg/users"
-
-	_ "github.com/lib/pq"
 )
 
 type User = users.User
@@ -39,6 +39,24 @@ func GetConfig() string {
 	}
 	result := fmt.Sprintf("postgres://%s:%s@sqlserver/%s?sslmode=disable", conf.User, conf.Password, conf.DB)
 	return result
+}
+func GetKey() string {
+	yfile, err := ioutil.ReadFile("../configs/config.yaml")
+
+	if err != nil {
+
+		log.Fatal(err)
+	}
+
+	conf := *&users.Config{}
+
+	err2 := yaml.Unmarshal(yfile, &conf)
+
+	if err2 != nil {
+
+		log.Fatal(err2)
+	}
+	return conf.Key
 }
 func InsertToDB(u User) {
 	pgxconn, err := pgx.Connect(context.Background(), GetConfig())
@@ -96,19 +114,17 @@ func GiveToken(u LoginUser) string {
 	defer db.Close()
 	var searchId int
 	err = pgxconn.QueryRow(context.Background(), "SELECT user_id FROM signed_users WHERE email=$1", u.LoginMail).Scan(&searchId)
-	token := make([]byte, 8)
-	if _, err := rand.Read(token); err != nil {
-		panic(err)
-	}
-	insertToken, err := db.Query("insert into tokens (user_id,token) values ($1,$2)", searchId, base64.StdEncoding.EncodeToString(token))
+	token := CreateToken(u.LoginMail)
+	insertToken, err := db.Query("insert into tokens (user_id,token) values ($1,$2)", searchId, token)
 	if err != nil {
 		panic(err)
 	}
 	defer insertToken.Close()
 	fmt.Println("inserting token")
-	return base64.StdEncoding.EncodeToString(token)
+	return token
 }
 func DropToken(token string) {
+	fmt.Println(token)
 	psqlconn := fmt.Sprintf(GetConfig())
 	db, err := sql.Open("postgres", psqlconn)
 	if err != nil {
@@ -120,4 +136,24 @@ func DropToken(token string) {
 		panic(err)
 	}
 	defer drop.Close()
+}
+
+func CreateToken(email string) string {
+	pgxconn, err := pgx.Connect(context.Background(), GetConfig())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	var Fname string
+	var Lname string
+	err = pgxconn.QueryRow(context.Background(), "SELECT firstname,lastname FROM signed_users WHERE email=$1", email).Scan(&Fname, &Lname)
+	hmacSampleSecret := []byte(GetKey())
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"name": Fname + " " + Lname,
+	})
+	tokenString, err := token.SignedString(hmacSampleSecret)
+	if err != nil {
+		panic(err)
+	}
+	return tokenString
 }
