@@ -15,6 +15,7 @@ import (
 	"log"
 	"os"
 	"registration-web-service2/pkg/users"
+	"time"
 )
 
 type User = users.User
@@ -149,7 +150,8 @@ func CreateToken(email string) string {
 	err = pgxconn.QueryRow(context.Background(), "SELECT firstname,lastname FROM signed_users WHERE email=$1", email).Scan(&Fname, &Lname)
 	hmacSampleSecret := []byte(GetKey())
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"name": Fname + " " + Lname,
+		"name":      Fname + " " + Lname,
+		"ExpiresAt": time.Now().Add(12 * time.Hour).Unix(),
 	})
 	tokenString, err := token.SignedString(hmacSampleSecret)
 	if err != nil {

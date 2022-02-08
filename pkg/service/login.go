@@ -99,21 +99,10 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 func SayName(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(500)
-		return
-	}
-	defer r.Body.Close()
-	data := []byte(b)
-	var token string
-	err = json.Unmarshal(data, &token)
-	if err != nil {
-		return
-	}
+	token := r.Header.Get("Authorization")
 	resp := TokenResponse{}
 	resp.ResponseMessage = validation.SayNameFunc(token)
-	b, err = json.Marshal(resp)
+	b, err := json.Marshal(resp)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
