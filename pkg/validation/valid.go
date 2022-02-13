@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"registration-web-service2/pkg/store"
 	"registration-web-service2/pkg/users"
+	"time"
 )
 
 type User = users.User
@@ -120,7 +121,7 @@ func CheckLoginPassword(u LoginUser) bool {
 	return true
 
 }
-func SayNameFunc(tokenString string) string {
+func SayNameFunc(tokenString string) (string, bool) {
 	hmacSampleSecret := []byte(store.GetKey())
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -130,10 +131,27 @@ func SayNameFunc(tokenString string) string {
 		return hmacSampleSecret, nil
 	})
 	var result string
+
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		result = fmt.Sprintln(claims["name"])
+		if TimeValid(claims["ExpiresAt"]) {
+			result = fmt.Sprintln(claims["name"])
+		} else {
+			fmt.Println(err, "asddas")
+			return "", false
+		}
 	} else {
 		fmt.Println(err)
+		return "", false
 	}
-	return result
+	return result, true
+}
+func TimeValid(i interface{}) bool {
+	lifeTime := i.(float64)
+
+	if int64(lifeTime) < time.Now().Unix() {
+		fmt.Println("time!")
+		return false
+	}
+	return true
+
 }

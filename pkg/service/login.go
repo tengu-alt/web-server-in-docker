@@ -101,7 +101,13 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 func SayName(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Authorization")
 	resp := TokenResponse{}
-	resp.ResponseMessage = validation.SayNameFunc(token)
+	Message, time := validation.SayNameFunc(token)
+	if !time {
+		resp.ResponseMessage = "login again"
+		store.DropToken(token)
+	} else {
+		resp.ResponseMessage = Message
+	}
 	b, err := json.Marshal(resp)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

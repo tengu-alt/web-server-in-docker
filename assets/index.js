@@ -110,6 +110,11 @@ function doLogin(){
 
 
 }
+function logout(){
+  window.localStorage.clear()
+  document.querySelector(".formLogin").classList.remove("hidden")
+  window.location.reload()
+}
 function doLogout(){
   const url = window.location.origin + "/logout";
 
@@ -126,10 +131,7 @@ function doLogout(){
     referrerPolicy: 'no-referrer',
     body: JSON.stringify(data)
   }).then((response) => {
-    window.localStorage.clear()
-    document.querySelector(".formLogin").classList.remove("hidden")
-    window.location.reload()
-
+    logout()
   })
 }
 function doSayName(){
@@ -150,6 +152,9 @@ function doSayName(){
   }).then((response) => {
     return response.json()
   }).then((data) => {
+    if(data.ResponseMessage === "login again"){
+      logout()
+    }
     document.querySelector(".sayDiv").innerHTML = data.ResponseMessage
   });
 
