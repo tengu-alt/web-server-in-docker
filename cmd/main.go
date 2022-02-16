@@ -7,7 +7,7 @@ import (
 	"registration-web-service2/pkg/service"
 )
 
-func hello(w http.ResponseWriter, r *http.Request) {
+func loadMainPage(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.Error(w, "404 not found.", http.StatusNotFound)
 		return
@@ -16,7 +16,7 @@ func hello(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", hello)
+	http.HandleFunc("/", loadMainPage)
 	http.HandleFunc("/signUp", service.SignUp)
 	http.HandleFunc("/login", service.Login)
 	http.HandleFunc("/sayname", service.SayName)

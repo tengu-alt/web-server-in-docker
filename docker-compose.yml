@@ -14,7 +14,7 @@ services:
       - ./scripts:/docker-entrypoint-credentialsdb.d/
       - ./scripts:/docker-entrypoint-initdb.d/
       - pg_data:/var/lib/sql-server/data
-  regir:
+  registration:
     ports:
       - "8081:8081"
     build:

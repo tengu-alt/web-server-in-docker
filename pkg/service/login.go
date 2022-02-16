@@ -47,6 +47,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	store.InsertToDB(u)
 	w.Write([]byte("[{}]"))
 }
+
 func Login(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -82,6 +83,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
 func Logout(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -98,6 +100,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	store.DropToken(token)
 	w.Write(b)
 }
+
 func SayName(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Authorization")
 	resp := TokenResponse{}
@@ -114,5 +117,4 @@ func SayName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(b)
-
 }

@@ -23,6 +23,7 @@ func Printer(i string) string {
 	return i
 
 }
+
 func ValidEmail(email string) bool {
 	var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	if emailRegex.MatchString(email) != true {
@@ -30,6 +31,7 @@ func ValidEmail(email string) bool {
 	}
 	return true
 }
+
 func CheckMail(email string) bool {
 	pgxconn, err := pgx.Connect(context.Background(), store.GetConfig())
 	if err != nil {
@@ -44,18 +46,21 @@ func CheckMail(email string) bool {
 	}
 	return true
 }
+
 func NameValid(name string, min, max int) bool {
 	if len(name) < min || len(name) > max {
 		return false
 	}
 	return true
 }
+
 func PasswordValid(password string, min int) bool {
 	if len(password) < min {
 		return false
 	}
 	return true
 }
+
 func Validate(u User) []ValidationErr {
 	errors := make([]ValidationErr, 0, 0)
 	if NameValid(u.FirstName, 2, 64) != true {
@@ -92,6 +97,7 @@ func Validate(u User) []ValidationErr {
 
 	return errors
 }
+
 func LoginValid(u LoginUser) bool {
 	if CheckMail(u.LoginMail) == false {
 		if CheckLoginPassword(u) == true {
@@ -100,6 +106,7 @@ func LoginValid(u LoginUser) bool {
 	}
 	return false
 }
+
 func CheckLoginPassword(u LoginUser) bool {
 	pgxconn, err := pgx.Connect(context.Background(), store.GetConfig())
 	if err != nil {
@@ -119,8 +126,8 @@ func CheckLoginPassword(u LoginUser) bool {
 	}
 
 	return true
-
 }
+
 func SayNameFunc(tokenString string) (string, bool) {
 	hmacSampleSecret := []byte(store.GetKey())
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -145,6 +152,7 @@ func SayNameFunc(tokenString string) (string, bool) {
 	}
 	return result, true
 }
+
 func TimeValid(i interface{}) bool {
 	lifeTime := i.(float64)
 
