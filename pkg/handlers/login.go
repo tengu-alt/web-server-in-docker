@@ -1,19 +1,19 @@
-package service
+package handlers
 
 import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"registration-web-service2/pkg/models"
 	"registration-web-service2/pkg/store"
-	"registration-web-service2/pkg/users"
 	"registration-web-service2/pkg/validation"
 )
 
-type User = users.User
-type ValidationErr = users.ValidationErr
-type LoginUser = users.LoginUser
-type TokenResponse = users.TokenResponse
+type User = models.User
+type ValidationErr = models.ValidationErr
+type LoginUser = models.LoginUser
+type TokenResponse = models.TokenResponse
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
@@ -23,7 +23,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 	data := []byte(b)
-	u := *&users.User{}
+	u := *&models.User{}
 	err = json.Unmarshal(data, &u)
 	if err != nil {
 		return
@@ -56,7 +56,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 	data := []byte(b)
-	us := *&users.LoginUser{}
+	us := *&models.LoginUser{}
 	err = json.Unmarshal(data, &us)
 	if err != nil {
 		return

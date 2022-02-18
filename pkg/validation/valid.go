@@ -9,14 +9,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"os"
 	"regexp"
+	"registration-web-service2/pkg/models"
 	"registration-web-service2/pkg/store"
-	"registration-web-service2/pkg/users"
 	"time"
 )
 
-type User = users.User
-type LoginUser = users.LoginUser
-type ValidationErr = users.ValidationErr
+type User = models.User
+type LoginUser = models.LoginUser
+type ValidationErr = models.ValidationErr
 
 func Printer(i string) string {
 	fmt.Printf(i)

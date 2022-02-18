@@ -1,4 +1,4 @@
 user : "postgres"
 password : "12345"
-db : "users"
+db : "models"
 key: "qwerty"

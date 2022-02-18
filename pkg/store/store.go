@@ -11,13 +11,13 @@ import (
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
-	"registration-web-service2/pkg/users"
+	"registration-web-service2/pkg/models"
 	"time"
 )
 
-type User = users.User
-type Config = users.Config
-type LoginUser = users.LoginUser
+type User = models.User
+type Config = models.Config
+type LoginUser = models.LoginUser
 
 func GetConfig() string {
 	yfile, err := ioutil.ReadFile("../cmd/config.yaml")
@@ -27,7 +27,7 @@ func GetConfig() string {
 		log.Fatal(err)
 	}
 
-	conf := *&users.Config{}
+	conf := *&models.Config{}
 
 	err2 := yaml.Unmarshal(yfile, &conf)
 
@@ -47,7 +47,7 @@ func GetKey() string {
 		log.Fatal(err)
 	}
 
-	conf := *&users.Config{}
+	conf := *&models.Config{}
 
 	err2 := yaml.Unmarshal(yfile, &conf)
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"registration-web-service2/pkg/service"
+	"registration-web-service2/pkg/handlers"
 )
 
 func loadMainPage(w http.ResponseWriter, r *http.Request) {
@@ -17,10 +17,10 @@ func loadMainPage(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/", loadMainPage)
-	http.HandleFunc("/signUp", service.SignUp)
-	http.HandleFunc("/login", service.Login)
-	http.HandleFunc("/sayname", service.SayName)
-	http.HandleFunc("/logout", service.Logout)
+	http.HandleFunc("/signUp", handlers.SignUp)
+	http.HandleFunc("/login", handlers.Login)
+	http.HandleFunc("/sayname", handlers.SayName)
+	http.HandleFunc("/logout", handlers.Logout)
 	http.Handle("/login.html", http.FileServer(http.Dir("../assets")))
 	http.Handle("/submit.html", http.FileServer(http.Dir("../assets")))
 	http.Handle("/index.js", http.FileServer(http.Dir("../assets")))
