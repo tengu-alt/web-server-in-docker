@@ -1,18 +1,13 @@
 package store
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"fmt"
-	"github.com/golang-jwt/jwt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
 	"registration-web-service2/pkg/models"
-	"time"
 )
 
 type User = models.User
@@ -58,7 +53,7 @@ func GetKey() string {
 	return conf.Key
 }
 
-func InsertToDB(u User) {
+func InsertToDB(u User, salt, hash string) {
 	db, err := sqlx.Connect("postgres", GetConfig())
 	if err != nil {
 		log.Fatalln(err)
@@ -79,60 +74,30 @@ func InsertToDB(u User) {
 		panic(err)
 	}
 	//defer insert.Close()
-	salt := make([]byte, 8)
-	if _, err := rand.Read(salt); err != nil {
-		panic(err)
-	}
+	//salt := make([]byte, 8)
+	//if _, err := rand.Read(salt); err != nil {
+	//panic(err)
+	//}
 	var searchId int
 	err = db.Get(&searchId, "SELECT user_id FROM signed_users WHERE email=$1", u.Email)
-	_, err = db.Queryx("insert into credentials (user_id,salt,salt_hash) values ($1,$2,$3)", searchId, base64.StdEncoding.EncodeToString(salt), HashPassword(u.Password+base64.StdEncoding.EncodeToString(salt)))
+	_, err = db.Queryx("insert into credentials (user_id,salt,salt_hash) values ($1,$2,$3)", searchId, salt, hash)
 	if err != nil {
 		panic(err)
 	}
 	//defer insertHash.Close()
-	fmt.Println("inserting")
 
 }
 
-func HashPassword(password string) string {
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		panic(err)
-	}
-
-	return base64.StdEncoding.EncodeToString(hashedPassword)
-
-}
-
-func GiveToken(u LoginUser) string {
-	db, err := sqlx.Connect("postgres", GetConfig())
-	if err != nil {
-		log.Fatalln(err)
-	}
-	//pgxconn, err := pgx.Connect(context.Background(), GetConfig())
-	//if err != nil {
-	//	fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-	//	os.Exit(1)
-	//}
-	//defer pgxconn.Close(context.Background())
-	//psqlconn := fmt.Sprintf(GetConfig())
-	//db, err := sql.Open("postgres", psqlconn)
-	//if err != nil {
-	//panic(err)
-	//}
-	//defer db.Close()
-	var searchId int
-	err = db.Get(&searchId, "SELECT user_id FROM signed_users WHERE email=$1", u.LoginMail)
-	token := CreateToken(u.LoginMail)
-	_, err = db.Queryx("insert into tokens (user_id,token) values ($1,$2)", searchId, token)
-	if err != nil {
-		panic(err)
-	}
-	//defer insertToken.Close()
-	fmt.Println("inserting token")
-	return token
-}
+//func HashPassword(password string) string {
+//
+//	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	return base64.StdEncoding.EncodeToString(hashedPassword)
+//
+//}
 
 func DropToken(token string) {
 	//fmt.Println(token)
@@ -151,38 +116,6 @@ func DropToken(token string) {
 		panic(err)
 	}
 	//defer drop.Close()
-}
-
-func CreateToken(email string) string {
-	//pgxconn, err := pgx.Connect(context.Background(), GetConfig())
-	//if err != nil {
-	//	fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-	//	os.Exit(1)
-	//}
-	db, err := sqlx.Connect("postgres", GetConfig())
-	if err != nil {
-		log.Fatalln(err)
-	}
-	var Fname string
-	var Lname string
-	err = db.Get(&Fname, "SELECT firstname FROM signed_users WHERE email=$1", email)
-	if err == nil {
-		fmt.Sprintln(err)
-	}
-	err = db.Get(&Lname, "SELECT lastname FROM signed_users WHERE email=$1", email)
-	if err == nil {
-		fmt.Sprintln(err)
-	}
-	hmacSampleSecret := []byte(GetKey())
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"name":      Fname + " " + Lname,
-		"ExpiresAt": time.Now().Add(12 * time.Hour).Unix(),
-	})
-	tokenString, err := token.SignedString(hmacSampleSecret)
-	if err != nil {
-		panic(err)
-	}
-	return tokenString
 }
 
 func TestDb() string {

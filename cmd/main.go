@@ -17,8 +17,8 @@ func loadMainPage(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/", loadMainPage)
-	http.HandleFunc("/signUp", handlers.SignUp)
-	http.HandleFunc("/login", handlers.Login)
+	http.HandleFunc("/signUp", handlers.SignUpHandler)
+	http.HandleFunc("/login", handlers.LoginHandler)
 	http.HandleFunc("/sayname", handlers.SayName)
 	http.HandleFunc("/logout", handlers.Logout)
 	http.Handle("/login.html", http.FileServer(http.Dir("../assets")))

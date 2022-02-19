@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"registration-web-service2/pkg/models"
+	"registration-web-service2/pkg/service"
 	"registration-web-service2/pkg/store"
 	"registration-web-service2/pkg/validation"
 )
@@ -15,10 +15,10 @@ type ValidationErr = models.ValidationErr
 type LoginUser = models.LoginUser
 type TokenResponse = models.TokenResponse
 
-func SignUp(w http.ResponseWriter, r *http.Request) {
+func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer r.Body.Close()
@@ -28,10 +28,8 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	fmt.Println(string(data))
-	validationErrors := validation.Validate(u)
-	fmt.Printf("%s", validationErrors)
-	if len(validationErrors) > 0 {
+	validationErrors, err := service.SignUp(u)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 
 		b, err := json.Marshal(&validationErrors)
@@ -43,12 +41,10 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		w.Write(b)
 		return
 	}
-	fmt.Print("user", u)
-	store.InsertToDB(u)
 	w.Write([]byte("[{}]"))
 }
 
-func Login(w http.ResponseWriter, r *http.Request) {
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(500)
@@ -63,7 +59,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 	resp := TokenResponse{}
 	if validation.LoginValid(us) == true {
-		token := store.GiveToken(us)
+		token := service.GiveToken(us)
 		resp.ResponseMessage = "success login"
 		resp.Token = token
 		b, err := json.Marshal(resp)
