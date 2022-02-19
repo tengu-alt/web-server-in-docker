@@ -2,9 +2,11 @@ package service
 
 import (
 	"errors"
-	"registration-web-service2/pkg/models"
-	"registration-web-service2/pkg/store"
-	"registration-web-service2/pkg/validation"
+	"fmt"
+	"github.com/golang-jwt/jwt"
+	"web-server-in-docker/pkg/models"
+	"web-server-in-docker/pkg/store"
+	"web-server-in-docker/pkg/validation"
 )
 
 func SignUp(u models.User) ([]models.ValidationErr, error) {
@@ -21,6 +23,48 @@ func SignUp(u models.User) ([]models.ValidationErr, error) {
 
 }
 
-//func Login(u models.LoginUser) (models.TokenResponse,error){
-//
-//}
+func Login(u models.LoginUser) (models.TokenResponse, error) {
+	var err error
+	resp := models.TokenResponse{}
+	if validation.LoginValid(u) == true {
+		token := GiveToken(u)
+		resp.ResponseMessage = "success login"
+		resp.Token = token
+		return resp, nil
+	} else {
+		resp.ResponseMessage = "invalid data"
+		err = errors.New("failedValidation")
+		return resp, err
+	}
+}
+func Logout(token string) error {
+	err := store.DropToken(token)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func SayName(tokenString string) (string, bool) {
+	hmacSampleSecret := []byte(store.GetKey())
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return hmacSampleSecret, nil
+	})
+	var result string
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if validation.TimeValid(claims["ExpiresAt"]) {
+			result = fmt.Sprintln(claims["name"])
+		} else {
+			return "", false
+		}
+	} else {
+		fmt.Println(err)
+		return "", false
+	}
+	return result, true
+}

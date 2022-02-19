@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
-	"registration-web-service2/pkg/models"
+	"web-server-in-docker/pkg/models"
 )
 
 type User = models.User
@@ -99,7 +99,7 @@ func InsertToDB(u User, salt, hash string) {
 //
 //}
 
-func DropToken(token string) {
+func DropToken(token string) error {
 	//fmt.Println(token)
 	//psqlconn := fmt.Sprintf(GetConfig())
 	//db, err := sql.Open("postgres", psqlconn)
@@ -113,8 +113,9 @@ func DropToken(token string) {
 	}
 	_, err = db.Queryx("delete from tokens where token = $1", token)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 	//defer drop.Close()
 }
 

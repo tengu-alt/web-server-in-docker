@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"registration-web-service2/pkg/models"
-	"registration-web-service2/pkg/service"
-	"registration-web-service2/pkg/store"
-	"registration-web-service2/pkg/validation"
+	"web-server-in-docker/pkg/models"
+	"web-server-in-docker/pkg/service"
+	"web-server-in-docker/pkg/store"
 )
 
 type User = models.User
@@ -47,29 +46,26 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer r.Body.Close()
 	data := []byte(b)
-	us := *&models.LoginUser{}
+	us := models.LoginUser{}
 	err = json.Unmarshal(data, &us)
 	if err != nil {
 		return
 	}
-	resp := TokenResponse{}
-	if validation.LoginValid(us) == true {
-		token := service.GiveToken(us)
-		resp.ResponseMessage = "success login"
-		resp.Token = token
+	resp, err := service.Login(us)
+	if err != nil {
 		b, err := json.Marshal(resp)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		w.Write(b)
+
 	} else {
-		resp.ResponseMessage = "invalid data"
 		b, err := json.Marshal(resp)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -83,7 +79,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 func Logout(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer r.Body.Close()
@@ -93,14 +89,18 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	store.DropToken(token)
+	err = service.Logout(token)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	w.Write(b)
 }
 
-func SayName(w http.ResponseWriter, r *http.Request) {
+func SayNameHandler(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Authorization")
 	resp := TokenResponse{}
-	Message, time := validation.SayNameFunc(token)
+	Message, time := service.SayName(token)
 	if !time {
 		resp.ResponseMessage = "login again"
 		store.DropToken(token)

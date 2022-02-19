@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"registration-web-service2/pkg/handlers"
+	"web-server-in-docker/pkg/handlers"
 )
 
 func loadMainPage(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +19,7 @@ func main() {
 	http.HandleFunc("/", loadMainPage)
 	http.HandleFunc("/signUp", handlers.SignUpHandler)
 	http.HandleFunc("/login", handlers.LoginHandler)
-	http.HandleFunc("/sayname", handlers.SayName)
+	http.HandleFunc("/sayname", handlers.SayNameHandler)
 	http.HandleFunc("/logout", handlers.Logout)
 	http.Handle("/login.html", http.FileServer(http.Dir("../assets")))
 	http.Handle("/submit.html", http.FileServer(http.Dir("../assets")))

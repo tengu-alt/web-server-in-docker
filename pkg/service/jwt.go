@@ -5,9 +5,9 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/jmoiron/sqlx"
 	"log"
-	"registration-web-service2/pkg/models"
-	"registration-web-service2/pkg/store"
 	"time"
+	"web-server-in-docker/pkg/models"
+	"web-server-in-docker/pkg/store"
 )
 
 func GiveToken(u models.LoginUser) string {
@@ -35,7 +35,6 @@ func GiveToken(u models.LoginUser) string {
 		panic(err)
 	}
 	//defer insertToken.Close()
-	fmt.Println("inserting token")
 	return token
 }
 

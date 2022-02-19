@@ -4,14 +4,13 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/golang-jwt/jwt"
 	"github.com/jackc/pgx/v4"
 	"golang.org/x/crypto/bcrypt"
 	"os"
 	"regexp"
-	"registration-web-service2/pkg/models"
-	"registration-web-service2/pkg/store"
 	"time"
+	"web-server-in-docker/pkg/models"
+	"web-server-in-docker/pkg/store"
 )
 
 type User = models.User
@@ -126,31 +125,6 @@ func CheckLoginPassword(u LoginUser) bool {
 	}
 
 	return true
-}
-
-func SayNameFunc(tokenString string) (string, bool) {
-	hmacSampleSecret := []byte(store.GetKey())
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return hmacSampleSecret, nil
-	})
-	var result string
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		if TimeValid(claims["ExpiresAt"]) {
-			result = fmt.Sprintln(claims["name"])
-		} else {
-			fmt.Println(err, "asddas")
-			return "", false
-		}
-	} else {
-		fmt.Println(err)
-		return "", false
-	}
-	return result, true
 }
 
 func TimeValid(i interface{}) bool {

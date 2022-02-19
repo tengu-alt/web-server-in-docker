@@ -1,4 +1,4 @@
-module registration-web-service2
+module web-server-in-docker
 
 go 1.17
 
