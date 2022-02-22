@@ -12,7 +12,12 @@ func loadMainPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "404 not found.", http.StatusNotFound)
 		return
 	}
-	http.ServeFile(w, r, "../assets/index.html")
+	if r.URL.Path == "/" {
+		http.ServeFile(w, r, "../assets/index.html")
+		return
+	}
+
+	http.ServeFile(w, r, "../assets/"+r.URL.Path)
 }
 
 func main() {
@@ -27,7 +32,7 @@ func main() {
 	http.Handle("/eNWDJx.jpg", http.FileServer(http.Dir("../assets")))
 	http.Handle("/style.css", http.FileServer(http.Dir("../assets")))
 	fmt.Printf("Starting server for testing HTTP POST in 8081...\n")
-	if err := http.ListenAndServe(":8081", nil); err != nil {
+	if err := http.ListenAndServe("0.0.0.0:8081", nil); err != nil {
 		log.Fatal(err)
 	}
 }

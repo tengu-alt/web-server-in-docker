@@ -1,20 +1,13 @@
 package service
 
 import (
-	"fmt"
 	"github.com/golang-jwt/jwt"
-	"github.com/jmoiron/sqlx"
-	"log"
 	"time"
 	"web-server-in-docker/pkg/models"
 	"web-server-in-docker/pkg/store"
 )
 
 func GiveToken(u models.LoginUser) string {
-	db, err := sqlx.Connect("postgres", store.GetConfig())
-	if err != nil {
-		log.Fatalln(err)
-	}
 	//pgxconn, err := pgx.Connect(context.Background(), GetConfig())
 	//if err != nil {
 	//	fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
@@ -27,12 +20,10 @@ func GiveToken(u models.LoginUser) string {
 	//panic(err)
 	//}
 	//defer db.Close()
-	var searchId int
-	err = db.Get(&searchId, "SELECT user_id FROM signed_users WHERE email=$1", u.LoginMail)
 	token := CreateToken(u.LoginMail)
-	_, err = db.Queryx("insert into tokens (user_id,token) values ($1,$2)", searchId, token)
+	err := store.InsertToken(u.LoginMail, token)
 	if err != nil {
-		panic(err)
+		return err.Error()
 	}
 	//defer insertToken.Close()
 	return token
@@ -44,19 +35,23 @@ func CreateToken(email string) string {
 	//	fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
 	//	os.Exit(1)
 	//}
-	db, err := sqlx.Connect("postgres", store.GetConfig())
+	//db, err := sqlx.Connect("postgres", store.GetConfig())
+	//if err != nil {
+	//	log.Fatalln(err)
+	//}
+	//var Fname string
+	//var Lname string
+	//err = db.Get(&Fname, "SELECT firstname FROM signed_users WHERE email=$1", email)
+	//if err == nil {
+	//	fmt.Sprintln(err)
+	//}
+	//err = db.Get(&Lname, "SELECT lastname FROM signed_users WHERE email=$1", email)
+	//if err == nil {
+	//	fmt.Sprintln(err)
+	//}
+	Fname, Lname, err := store.GetNames(email)
 	if err != nil {
-		log.Fatalln(err)
-	}
-	var Fname string
-	var Lname string
-	err = db.Get(&Fname, "SELECT firstname FROM signed_users WHERE email=$1", email)
-	if err == nil {
-		fmt.Sprintln(err)
-	}
-	err = db.Get(&Lname, "SELECT lastname FROM signed_users WHERE email=$1", email)
-	if err == nil {
-		fmt.Sprintln(err)
+		return err.Error()
 	}
 	hmacSampleSecret := []byte(store.GetKey())
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{

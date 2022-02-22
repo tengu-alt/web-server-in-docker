@@ -19,6 +19,8 @@ services:
       - "8081:8081"
     build:
       context: .
+    volumes:
+      - ./cmd:/cmd
 
 
 volumes:

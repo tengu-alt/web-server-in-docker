@@ -131,3 +131,36 @@ func TestDb() string {
 	}
 	return pers
 }
+
+func GetNames(email string) (string, string, error) {
+
+	db, err := sqlx.Connect("postgres", GetConfig())
+	if err != nil {
+		log.Fatalln(err)
+	}
+	var Fname string
+	var Lname string
+	err = db.Get(&Fname, "SELECT firstname FROM signed_users WHERE email=$1", email)
+	if err != nil {
+		return "", "", err
+	}
+	err = db.Get(&Lname, "SELECT lastname FROM signed_users WHERE email=$1", email)
+	if err != nil {
+		return "", "", err
+	}
+	return Fname, Lname, nil
+}
+func InsertToken(email, token string) error {
+	db, err := sqlx.Connect("postgres", GetConfig())
+	if err != nil {
+		log.Fatalln(err)
+	}
+	var searchId int
+	err = db.Get(&searchId, "SELECT user_id FROM signed_users WHERE email=$1", email)
+	_, err = db.Queryx("insert into tokens (user_id,token) values ($1,$2)", searchId, token)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
