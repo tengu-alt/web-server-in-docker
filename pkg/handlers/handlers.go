@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/jmoiron/sqlx"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"web-server-in-docker/pkg/models"
 	"web-server-in-docker/pkg/service"
@@ -13,8 +15,41 @@ type User = models.User
 type ValidationErr = models.ValidationErr
 type LoginUser = models.LoginUser
 type TokenResponse = models.TokenResponse
+type DBconn struct {
+	Data *sqlx.DB
+}
 
-func SignUpHandler(w http.ResponseWriter, r *http.Request) {
+func NewConnect(str string) *DBconn {
+	db, err := sqlx.Connect("postgres", str)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return &DBconn{
+		Data: db,
+	}
+}
+
+func NewSignUpHandler(db *DBconn) http.HandlerFunc {
+	return db.SignUpHandler
+
+}
+
+func NewLoginHandler(db *DBconn) http.HandlerFunc {
+	return db.LoginHandler
+
+}
+
+func NewLogoutHandler(db *DBconn) http.HandlerFunc {
+	return db.LogoutHandler
+
+}
+
+func NewSayNameHandler(db *DBconn) http.HandlerFunc {
+	return db.SayNameHandler
+
+}
+
+func (connectStruct DBconn) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -22,12 +57,12 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 	data := []byte(b)
-	u := *&models.User{}
+	u := User{}
 	err = json.Unmarshal(data, &u)
 	if err != nil {
 		return
 	}
-	validationErrors, err := service.SignUp(u)
+	validationErrors, err := service.SignUp(u, connectStruct.Data)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 
@@ -43,7 +78,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("[{}]"))
 }
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (connectStruct DBconn) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -51,12 +86,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 	data := []byte(b)
-	us := models.LoginUser{}
+	us := LoginUser{}
 	err = json.Unmarshal(data, &us)
 	if err != nil {
 		return
 	}
-	resp, err := service.Login(us)
+	resp, err := service.Login(us, connectStruct.Data)
 	if err != nil {
 		b, err := json.Marshal(resp)
 		if err != nil {
@@ -76,7 +111,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func Logout(w http.ResponseWriter, r *http.Request) {
+func (connectStruct DBconn) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -89,7 +124,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err = service.Logout(token)
+	err = service.Logout(token, connectStruct.Data)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -97,13 +132,13 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func SayNameHandler(w http.ResponseWriter, r *http.Request) {
+func (connectStruct DBconn) SayNameHandler(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Authorization")
 	resp := TokenResponse{}
 	Message, time := service.SayName(token)
 	if !time {
 		resp.ResponseMessage = "login again"
-		store.DropToken(token)
+		store.DropToken(token, connectStruct.Data)
 	} else {
 		resp.ResponseMessage = Message
 	}

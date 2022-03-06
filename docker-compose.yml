@@ -1,6 +1,15 @@
 version: "3.9"
 
 services:
+  registration:
+    ports:
+      - "8081:8081"
+    build:
+      context: .
+    volumes:
+      - ./cmd:/cmd
+    depends_on:
+      - sqlserver
   sqlserver:
     image: "postgres:14.1"
     ports:
@@ -14,13 +23,6 @@ services:
       - ./scripts:/docker-entrypoint-credentialsdb.d/
       - ./scripts:/docker-entrypoint-initdb.d/
       - pg_data:/var/lib/sql-server/data
-  registration:
-    ports:
-      - "8081:8081"
-    build:
-      context: .
-    volumes:
-      - ./cmd:/cmd
 
 
 volumes:

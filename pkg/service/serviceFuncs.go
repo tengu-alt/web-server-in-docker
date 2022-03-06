@@ -4,12 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt"
+	"github.com/jmoiron/sqlx"
 	"web-server-in-docker/pkg/models"
 	"web-server-in-docker/pkg/store"
 	"web-server-in-docker/pkg/validation"
 )
 
-func SignUp(u models.User) ([]models.ValidationErr, error) {
+func SignUp(u models.User, conn *sqlx.DB) ([]models.ValidationErr, error) {
 	var err error
 	validErrors := validation.Validate(u)
 	if len(validErrors) > 0 {
@@ -18,16 +19,16 @@ func SignUp(u models.User) ([]models.ValidationErr, error) {
 
 	}
 	salt, hash := ReturnSaltAndHash(u.Password)
-	store.InsertToDB(u, salt, hash)
+	store.InsertToDB(u, salt, hash, conn)
 	return nil, nil
 
 }
 
-func Login(u models.LoginUser) (models.TokenResponse, error) {
+func Login(u models.LoginUser, conn *sqlx.DB) (models.TokenResponse, error) {
 	var err error
 	resp := models.TokenResponse{}
 	if validation.LoginValid(u) == true {
-		token := GiveToken(u)
+		token := GiveToken(u, conn)
 		resp.ResponseMessage = "success login"
 		resp.Token = token
 		return resp, nil
@@ -37,8 +38,8 @@ func Login(u models.LoginUser) (models.TokenResponse, error) {
 		return resp, err
 	}
 }
-func Logout(token string) error {
-	err := store.DropToken(token)
+func Logout(token string, conn *sqlx.DB) error {
+	err := store.DropToken(token, conn)
 	if err != nil {
 		return err
 	}
