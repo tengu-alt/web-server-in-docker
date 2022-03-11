@@ -17,12 +17,6 @@ type User = models.User
 type LoginUser = models.LoginUser
 type ValidationErr = models.ValidationErr
 
-func Printer(i string) string {
-	fmt.Printf(i)
-	return i
-
-}
-
 func ValidEmail(email string) bool {
 	var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	if emailRegex.MatchString(email) != true {

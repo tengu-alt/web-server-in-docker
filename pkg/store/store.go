@@ -1,6 +1,7 @@
 package store
 
 //"postgres://postgres:12345@localhost/models?sslmode=disable"
+//migrate -database postgres://postgres:12345@localhost/models?sslmode=disable -path . up
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
@@ -22,8 +23,7 @@ func GetConfig() string {
 
 		log.Fatal(err)
 	}
-
-	conf := *&models.Config{}
+	conf := &Config{}
 
 	err2 := yaml.Unmarshal(yfile, &conf)
 
@@ -42,11 +42,8 @@ func GetKey() string {
 
 		log.Fatal(err)
 	}
-
-	conf := *&models.Config{}
-
+	conf := &Config{}
 	err2 := yaml.Unmarshal(yfile, &conf)
-
 	if err2 != nil {
 
 		log.Fatal(err2)
@@ -79,7 +76,6 @@ func DropToken(token string, conn *sqlx.DB) error {
 		return err
 	}
 	return nil
-
 }
 
 func GetNames(email string, conn *sqlx.DB) (string, string, error) {
@@ -97,6 +93,7 @@ func GetNames(email string, conn *sqlx.DB) (string, string, error) {
 	}
 	return Fname, Lname, nil
 }
+
 func InsertToken(email, token string, conn *sqlx.DB) error {
 	db := conn
 	var searchId int

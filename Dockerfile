@@ -3,7 +3,6 @@ WORKDIR /code
 COPY . /code/
 WORKDIR /code/cmd
 RUN go build -o /registration main.go
-#CMD ["go","run","main.go"]
 
 #############
 FROM alpine
