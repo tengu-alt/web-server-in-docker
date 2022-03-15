@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/jmoiron/sqlx"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"web-server-in-docker/pkg/models"
 	"web-server-in-docker/pkg/service"
@@ -19,14 +18,11 @@ type DBconn struct {
 	Data *sqlx.DB
 }
 
-func NewConnect(str string) *DBconn {
-	db, err := sqlx.Connect("postgres", str)
-	if err != nil {
-		log.Fatalln(err)
-	}
+func NewConnStruct(db *sqlx.DB) *DBconn {
 	return &DBconn{
 		Data: db,
 	}
+
 }
 
 func NewSignUpHandler(db *DBconn) http.HandlerFunc {
@@ -49,7 +45,7 @@ func NewSayNameHandler(db *DBconn) http.HandlerFunc {
 
 }
 
-func (connectStruct DBconn) SignUpHandler(w http.ResponseWriter, r *http.Request) {
+func (connectStruct *DBconn) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -78,7 +74,7 @@ func (connectStruct DBconn) SignUpHandler(w http.ResponseWriter, r *http.Request
 	w.Write([]byte("[{}]"))
 }
 
-func (connectStruct DBconn) LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (connectStruct *DBconn) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -111,7 +107,7 @@ func (connectStruct DBconn) LoginHandler(w http.ResponseWriter, r *http.Request)
 
 }
 
-func (connectStruct DBconn) LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func (connectStruct *DBconn) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -132,7 +128,7 @@ func (connectStruct DBconn) LogoutHandler(w http.ResponseWriter, r *http.Request
 	w.Write(b)
 }
 
-func (connectStruct DBconn) SayNameHandler(w http.ResponseWriter, r *http.Request) {
+func (connectStruct *DBconn) SayNameHandler(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Authorization")
 	resp := TokenResponse{}
 	Message, time := service.SayName(token)

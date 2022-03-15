@@ -19,7 +19,10 @@ func SignUp(u models.User, conn *sqlx.DB) ([]models.ValidationErr, error) {
 
 	}
 	salt, hash := ReturnSaltAndHash(u.Password)
-	store.InsertToDB(u, salt, hash, conn)
+	err = store.InsertToDB(u, salt, hash, conn)
+	if err != nil {
+		panic(err)
+	}
 	return nil, nil
 
 }

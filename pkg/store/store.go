@@ -16,6 +16,14 @@ type User = models.User
 type Config = models.Config
 type LoginUser = models.LoginUser
 
+func NewConnect(str string) (*sqlx.DB, error) {
+	db, err := sqlx.Connect("postgres", str)
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
+}
+
 func GetConfig() string {
 	yfile, err := ioutil.ReadFile("../cmd/config.yaml")
 
@@ -51,21 +59,21 @@ func GetKey() string {
 	return conf.Key
 }
 
-func InsertToDB(u User, salt, hash string, conn *sqlx.DB) {
+func InsertToDB(u User, salt, hash string, conn *sqlx.DB) error {
 	db := conn
 
 	_, err := db.Queryx("INSERT INTO signed_users (firstname,lastname,email) VALUES($1,$2,$3)", u.FirstName, u.LastName, u.Email)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	var searchId int
 	err = db.Get(&searchId, "SELECT user_id FROM signed_users WHERE email=$1", u.Email)
 	_, err = db.Queryx("insert into credentials (user_id,salt,salt_hash) values ($1,$2,$3)", searchId, salt, hash)
 	if err != nil {
-		panic(err)
+		return err
 	}
-
+	return nil
 }
 
 func DropToken(token string, conn *sqlx.DB) error {

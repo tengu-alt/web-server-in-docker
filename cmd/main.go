@@ -19,12 +19,16 @@ func loadMainPage(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	connString := store.GetConfig()
-	connect := handlers.NewConnect(connString)
+	database, err := store.NewConnect(connString)
+	if err != nil {
+		log.Fatal(err)
+	}
+	connection := handlers.NewConnStruct(database)
 	http.HandleFunc("/", loadMainPage)
-	http.HandleFunc("/signUp", handlers.NewSignUpHandler(connect))
-	http.HandleFunc("/login", handlers.NewLoginHandler(connect))
-	http.HandleFunc("/sayname", handlers.NewSayNameHandler(connect))
-	http.HandleFunc("/logout", handlers.NewLogoutHandler(connect))
+	http.HandleFunc("/signUp", handlers.NewSignUpHandler(connection))
+	http.HandleFunc("/login", handlers.NewLoginHandler(connection))
+	http.HandleFunc("/sayname", handlers.NewSayNameHandler(connection))
+	http.HandleFunc("/logout", handlers.NewLogoutHandler(connection))
 	fmt.Printf("Starting server for testing HTTP POST in 8081...\n")
 	if err := http.ListenAndServe("0.0.0.0:8081", nil); err != nil {
 		log.Fatal(err)
