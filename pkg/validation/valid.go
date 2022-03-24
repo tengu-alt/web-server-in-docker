@@ -1,12 +1,7 @@
 package validation
 
 import (
-	"context"
-	"encoding/base64"
 	"fmt"
-	"github.com/jackc/pgx/v4"
-	"golang.org/x/crypto/bcrypt"
-	"os"
 	"regexp"
 	"time"
 	"web-server-in-docker/pkg/models"
@@ -20,21 +15,6 @@ type ValidationErr = models.ValidationErr
 func ValidEmail(email string) bool {
 	var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	if emailRegex.MatchString(email) != true {
-		return false
-	}
-	return true
-}
-
-func CheckMail(email string) bool {
-	pgxconn, err := pgx.Connect(context.Background(), store.GetConfig())
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
-	}
-	defer pgxconn.Close(context.Background())
-	var searchMail string
-	err = pgxconn.QueryRow(context.Background(), "SELECT email FROM signed_users WHERE email=$1", email).Scan(&searchMail)
-	if searchMail == email {
 		return false
 	}
 	return true
@@ -54,7 +34,7 @@ func PasswordValid(password string, min int) bool {
 	return true
 }
 
-func Validate(u User) []ValidationErr {
+func Validate(u User, conn *store.DataBase) []ValidationErr {
 	errors := make([]ValidationErr, 0, 0)
 	if NameValid(u.FirstName, 2, 64) != true {
 		errors = append(errors, ValidationErr{
@@ -81,7 +61,7 @@ func Validate(u User) []ValidationErr {
 			FieldValue: "Email",
 			ErrMassage: "email failed verification",
 		})
-	} else if CheckMail(u.Email) != true {
+	} else if conn.CheckMail(u.Email) != true {
 		errors = append(errors, ValidationErr{
 			FieldValue: "Email",
 			ErrMassage: "email is already exist",
@@ -91,34 +71,13 @@ func Validate(u User) []ValidationErr {
 	return errors
 }
 
-func LoginValid(u LoginUser) bool {
-	if CheckMail(u.LoginMail) == false {
-		if CheckLoginPassword(u) == true {
+func LoginValid(u LoginUser, conn *store.DataBase) bool {
+	if conn.CheckMail(u.LoginMail) == false {
+		if conn.CheckLoginPassword(u) == true {
 			return true
 		}
 	}
 	return false
-}
-
-func CheckLoginPassword(u LoginUser) bool {
-	pgxconn, err := pgx.Connect(context.Background(), store.GetConfig())
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
-	}
-	defer pgxconn.Close(context.Background())
-	var searchId int
-	err = pgxconn.QueryRow(context.Background(), "SELECT user_id FROM signed_users WHERE email=$1", u.LoginMail).Scan(&searchId)
-	var searchSalt, searchHash string
-	err = pgxconn.QueryRow(context.Background(), "SELECT salt, salt_hash FROM credentials WHERE user_id=$1", searchId).Scan(&searchSalt, &searchHash)
-	compare, _ := base64.StdEncoding.DecodeString(searchHash)
-	err = bcrypt.CompareHashAndPassword(compare, []byte(u.LoginPassword+searchSalt))
-	if err != nil {
-
-		return false
-	}
-
-	return true
 }
 
 func TimeValid(i interface{}) bool {

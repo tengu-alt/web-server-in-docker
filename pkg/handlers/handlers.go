@@ -15,12 +15,14 @@ type ValidationErr = models.ValidationErr
 type LoginUser = models.LoginUser
 type TokenResponse = models.TokenResponse
 type DBconn struct {
-	Data *sqlx.DB
+	Data *store.DataBase
 }
 
 func NewConnStruct(db *sqlx.DB) *DBconn {
 	return &DBconn{
-		Data: db,
+		Data: &store.DataBase{
+			DBmodel: db,
+		},
 	}
 
 }
@@ -134,7 +136,7 @@ func (connectStruct *DBconn) SayNameHandler(w http.ResponseWriter, r *http.Reque
 	Message, time := service.SayName(token)
 	if !time {
 		resp.ResponseMessage = "login again"
-		store.DropToken(token, connectStruct.Data)
+		connectStruct.Data.DropToken(token)
 	} else {
 		resp.ResponseMessage = Message
 	}

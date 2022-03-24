@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"web-server-in-docker/pkg/configs"
 	"web-server-in-docker/pkg/handlers"
 	"web-server-in-docker/pkg/store"
 )
@@ -18,7 +19,7 @@ func loadMainPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	connString := store.GetConfig()
+	connString := configs.GetConfig()
 	database, err := store.NewConnect(connString)
 	if err != nil {
 		log.Fatal(err)
