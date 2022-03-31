@@ -48,7 +48,16 @@ func (conn *DataBase) InsertToDB(u User, salt, hash string) error {
 func (conn *DataBase) DropToken(token string) error {
 
 	db := conn.DBmodel
-	_, err := db.Queryx("delete from tokens where token = $1", token)
+	var searchToken string
+	err := db.Get(&searchToken, "select token from tokens where token = $1", token)
+	if err != nil {
+		return err
+	}
+	if token != searchToken {
+		return err
+
+	}
+	_, err = db.Queryx("delete from tokens where token = $1", token)
 	if err != nil {
 		return err
 	}
@@ -75,6 +84,9 @@ func (conn *DataBase) InsertToken(email, token string) error {
 	db := conn.DBmodel
 	var searchId int
 	err := db.Get(&searchId, "SELECT user_id FROM signed_users WHERE email=$1", email)
+	if err != nil {
+		return err
+	}
 	_, err = db.Queryx("insert into tokens (user_id,token) values ($1,$2)", searchId, token)
 	if err != nil {
 		return err
