@@ -77,7 +77,6 @@ func TestDataBase_InsertToken(t *testing.T) {
 	err = conn.InsertToken(testestcaseDBPos.User.Email, testestcaseDBPos.token)
 	if err != nil {
 		t.Error(err)
-		t.Fatal("cannot insert")
 	}
 	truncateCustomTable("signed_users")
 }
@@ -100,12 +99,11 @@ func TestDataBase_DropToken(t *testing.T) {
 	err = conn.InsertToDB(testestcaseDBPos.User, "", "")
 	err = conn.InsertToken(testestcaseDBPos.User.Email, testestcaseDBPos.token)
 	if err != nil {
-		t.Fatal("cannot insert")
+		t.Error(err)
 	}
 	err = conn.DropToken(testestcaseDBPos.token)
 	if err != nil {
 		t.Error(err)
-		t.Fatal("cannot drop")
 	}
 	truncateCustomTable("signed_users")
 }
@@ -128,7 +126,6 @@ func TestDataBase_CheckEmail(t *testing.T) {
 	err2 := conn.CheckMail(testestcaseDBPos.User.Email)
 	if err2 {
 		t.Error(err2)
-		t.Fatal("cannot check")
 	}
 	truncateCustomTable("signed_users")
 }
@@ -151,7 +148,6 @@ func TestDataBase_GetNames(t *testing.T) {
 	_, _, err = conn.GetNames(testestcaseDBPos.User.Email)
 	if err != nil {
 		t.Error(err)
-		t.Fatal("cannot get names")
 	}
 	truncateCustomTable("signed_users")
 }
