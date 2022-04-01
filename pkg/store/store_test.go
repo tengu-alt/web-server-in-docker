@@ -31,7 +31,7 @@ func truncateCustomTable(name string) {
 	}
 }
 
-func Test_InsertUserToPositive(t *testing.T) {
+func Test_InsertUserPositive(t *testing.T) {
 	u := models.User{
 		FirstName: "123",
 		LastName:  "123",
@@ -156,6 +156,36 @@ func TestDataBase_GetNames(t *testing.T) {
 	truncateCustomTable("signed_users")
 }
 
+func TestDataBase_CheckLoginPassword_failed(t *testing.T) {
+	loginUser := models.LoginUser{
+		LoginMail:     "123@123.1231",
+		LoginPassword: "123123123",
+	}
+	u := models.User{
+		FirstName: "123",
+		LastName:  "123",
+		Email:     "123@123.1231",
+	}
+	testcaseDBPos := testCase{
+		u,
+		"QFVgDYtUIzM=",
+		"JDJhJDEwJDBvdy9rNk1RdGkwemFaZHYwbWhCRXVKU2x5NEd6ZnBlVGRBYUdsLjFXbWFIcVJ6d2EzNHQu",
+		"asdasadasd",
+	}
+	connString := "postgres://postgres:12345@localhost:6080/models?sslmode=disable"
+	database, err := NewConnect(connString)
+	if err != nil {
+		t.Error(err)
+	}
+	conn := getConnStruct(database)
+	err = conn.InsertToDB(testcaseDBPos.User, testcaseDBPos.salt, testcaseDBPos.hash)
+	err2 := conn.CheckLoginPassword(loginUser)
+	if !err2 {
+		t.Fatal("err is nil")
+	}
+	truncateCustomTable("signed_users")
+}
+
 func TestDataBase_InsertToDB_failed(t *testing.T) {
 	u := models.User{
 		FirstName: "123",
@@ -220,7 +250,6 @@ func TestDataBase_InsertToken_failed(t *testing.T) {
 	truncateCustomTable("signed_users")
 }
 func TestDataBase_DropToken_failed(t *testing.T) {
-	//make fuckeng subtest
 	u := models.User{
 		FirstName: "123",
 		LastName:  "123",
