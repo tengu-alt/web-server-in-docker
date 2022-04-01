@@ -52,7 +52,6 @@ func Test_InsertUserPositive(t *testing.T) {
 	err = conn.InsertToDB(testcaseDBPos.User, testcaseDBPos.salt, testcaseDBPos.hash)
 	if err != nil {
 		t.Error(err)
-		t.Fatal("cannot insert")
 	}
 	truncateCustomTable("signed_users")
 }
@@ -204,7 +203,6 @@ func TestDataBase_InsertToDB_failed(t *testing.T) {
 		err = conn.InsertToDB(testcaseDB_failed.User, testcaseDB_failed.salt, testcaseDB_failed.hash)
 		if err != nil {
 			t.Error(err)
-			t.Fatal("cannot insert")
 		}
 		err = conn.InsertToDB(testcaseDB_failed.User, testcaseDB_failed.salt, testcaseDB_failed.hash)
 		if err == nil {
